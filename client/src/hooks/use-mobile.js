@@ -2,6 +2,12 @@ import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
 
+/**
+ * Determine whether the viewport width is less than MOBILE_BREAKPOINT.
+ *
+ * Subscribes to viewport width changes and updates internal state on mount; removes the listener on unmount.
+ * @returns {boolean} `true` if the viewport width is less than MOBILE_BREAKPOINT, `false` otherwise.
+ */
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState(undefined)
 

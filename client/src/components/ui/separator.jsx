@@ -3,6 +3,15 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Render a styled separator element.
+ *
+ * @param {Object} props - Component props.
+ * @param {string} [props.className] - Additional CSS class names to apply to the separator.
+ * @param {'horizontal'|'vertical'} [props.orientation='horizontal'] - Orientation of the separator.
+ * @param {boolean} [props.decorative=true] - Whether the separator is decorative for assistive technologies.
+ * @returns {JSX.Element} A React element representing a visual separator.
+ */
 function Separator({
   className,
   orientation = "horizontal",
