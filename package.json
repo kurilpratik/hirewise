@@ -1,0 +1,37 @@
+{
+  "name": "hirewise",
+  "version": "1.0.0",
+  "description": "AI-Enabled Job Resume Intelligence Platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon server/server.js",
+    "start": "node server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kurilpratik/hirewise.git"
+  },
+  "keywords": [
+    "AI",
+    "Job",
+    "Resume",
+    "Intelligence",
+    "Platform"
+  ],
+  "author": "Pratik Kuril",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  },
+  "bugs": {
+    "url": "https://github.com/kurilpratik/hirewise/issues"
+  },
+  "homepage": "https://github.com/kurilpratik/hirewise#readme"
+}
