@@ -2,6 +2,14 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Render a styled input element with merged class names and forwarded props.
+ *
+ * @param {string} [className] - Optional additional CSS class names to append to the component's base styles.
+ * @param {string} [type] - Value for the input's `type` attribute (e.g., "text", "password", "email").
+ * @param {object} props - Additional props to forward to the underlying `<input>` element (aria attributes, event handlers, etc.).
+ * @returns {JSX.Element} A configured `<input>` element with combined styling, `data-slot="input"`, the provided `type`, and all forwarded props.
+ */
 function Input({
   className,
   type,

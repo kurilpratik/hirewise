@@ -33,6 +33,14 @@ const items = [
   },
 ];
 
+/**
+ * Render the application sidebar containing a header with logo and greeting, a navigable menu, and a user footer.
+ *
+ * The navigation menu is generated from the local `items` array and each entry links to its `url` and displays its `icon` and `title`.
+ * The footer shows a compact user block with name, role, and a logout icon.
+ *
+ * @returns {JSX.Element} The sidebar JSX element.
+ */
 export function AppSidebar() {
   return (
     <Sidebar className="px-4 pb-2">

@@ -3,6 +3,13 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Provides tooltip context to descendant tooltip components.
+ *
+ * @param {Object} props - Component props.
+ * @param {number} [props.delayDuration=0] - Delay in milliseconds before a tooltip opens.
+ * @returns {import('react').ReactElement} The tooltip context provider element.
+ */
 function TooltipProvider({
   delayDuration = 0,
   ...props
@@ -10,6 +17,14 @@ function TooltipProvider({
   return (<TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />);
 }
 
+/**
+ * Wraps a Radix tooltip root with a TooltipProvider to supply tooltip context.
+ *
+ * Forwards all received props to the underlying TooltipPrimitive.Root.
+ *
+ * @param {object} props - Props to pass through to TooltipPrimitive.Root (for example: children, open, defaultOpen, onOpenChange, etc.).
+ * @returns {JSX.Element} A TooltipPrimitive.Root element wrapped by TooltipProvider.
+ */
 function Tooltip({
   ...props
 }) {
@@ -20,12 +35,29 @@ function Tooltip({
   );
 }
 
+/**
+ * Renders the element that triggers the tooltip.
+ * @param {object} props - Props forwarded to the underlying trigger element (e.g., event handlers, className, children).
+ * @returns {JSX.Element} The trigger element for the tooltip.
+ */
 function TooltipTrigger({
   ...props
 }) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
+/**
+ * Render the tooltip's content panel inside a portal.
+ *
+ * Renders Radix Tooltip content with default styling and a positioned arrow, supports a configurable
+ * side offset, merges additional CSS classes, and forwards any other props to the content element.
+ *
+ * @param {string} [className] - Additional CSS classes to merge with the component's default styles.
+ * @param {number} [sideOffset=0] - Distance in pixels between the tooltip content and its trigger.
+ * @param {import('react').ReactNode} [children] - Content to display inside the tooltip.
+ * @param {Object} [props] - Additional props forwarded to TooltipPrimitive.Content.
+ * @returns {JSX.Element} The tooltip content element rendered within a portal.
+ */
 function TooltipContent({
   className,
   sideOffset = 0,

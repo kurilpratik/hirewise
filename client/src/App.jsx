@@ -2,6 +2,11 @@ import "./App.css";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/layouts/DashboardLayout";
 
+/**
+ * Root application component that renders the dashboard layout and page heading.
+ *
+ * @returns {JSX.Element} A React element containing a DashboardLayout wrapping an h1 heading with the text "HireWise".
+ */
 function App() {
   return (
     <>
