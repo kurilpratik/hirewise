@@ -1,11 +1,13 @@
 import "./App.css";
 import { Button } from "@/components/ui/button";
+import DashboardLayout from "@/layouts/DashboardLayout";
 
 function App() {
   return (
     <>
-      <h1 className="font-faustina text-2xl font-bold">HireWise</h1>
-      <Button>Hire Me!</Button>
+      <DashboardLayout>
+        <h1 className="font-faustina text-2xl font-bold">HireWise</h1>
+      </DashboardLayout>
     </>
   );
 }
