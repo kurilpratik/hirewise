@@ -4,7 +4,7 @@ import validator from "validator";
 const applicationSchema = new mongoose.Schema(
   {
     jobId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: new mongoose.Schema.Types.ObjectId(),
       ref: "Job",
       required: [true, "Job reference is required"],
       index: true,
