@@ -16,8 +16,14 @@ const UploadResumes = () => {
   const handleFileSelect = (selectedFile) => {
     if (!selectedFile) return;
 
-    if (selectedFile.type !== "application/pdf") {
-      alert("Please select a PDF file.");
+    const allowedTypes = ["application/pdf", "text/plain"];
+    const allowedExtensions = [".pdf", ".txt"];
+    const fileName = selectedFile.name.toLowerCase();
+    const isValidType = allowedTypes.includes(selectedFile.type);
+    const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+    if (!isValidType && !isValidExtension) {
+      alert("Please select a PDF or text file.");
       return;
     }
 
@@ -89,17 +95,17 @@ const UploadResumes = () => {
               </Button>
               <div className="text-center">
                 <p className="text-foreground text-sm">
-                  Choose a PDF or drag & drop it here.
+                  Choose a PDF or text file or drag & drop it here.
                 </p>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  PDF only. Max 5 MB.
+                  PDF or TXT. Max 5 MB.
                 </p>
               </div>
             </div>
             <input
               ref={fileInputRef}
               type="file"
-              accept="application/pdf"
+              accept="application/pdf,.txt,text/plain"
               onChange={handleFileInputChange}
               className="hidden"
             />
