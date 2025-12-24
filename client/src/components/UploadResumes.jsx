@@ -14,9 +14,20 @@ const UploadResumes = () => {
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (selectedFile) => {
-    if (selectedFile && selectedFile.type === "application/pdf") {
-      setFile(selectedFile);
+    if (!selectedFile) return;
+
+    if (selectedFile.type !== "application/pdf") {
+      alert("Please select a PDF file.");
+      return;
     }
+
+    const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+    if (selectedFile.size > maxSize) {
+      alert("File size must not exceed 5 MB.");
+      return;
+    }
+
+    setFile(selectedFile);
   };
 
   const handleFileInputChange = (e) => {
@@ -81,7 +92,7 @@ const UploadResumes = () => {
                   Choose a PDF or drag & drop it here.
                 </p>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  PDF only. Max 20 MB.
+                  PDF only. Max 5 MB.
                 </p>
               </div>
             </div>
