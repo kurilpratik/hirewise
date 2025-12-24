@@ -13,17 +13,18 @@ import {
 } from "@/components/ui/sidebar";
 
 import Logo from "@/components/Logo";
+import { Link, useLocation } from "react-router-dom";
 
 // Menu items.
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "/home",
     icon: Home,
   },
   {
-    title: "All Jobs",
-    url: "#",
+    title: "Jobs",
+    url: "/jobs",
     icon: LaptopMinimalIcon,
   },
   {
@@ -34,6 +35,8 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const location = useLocation();
+
   return (
     <Sidebar className="px-4 pb-2">
       <SidebarHeader>
@@ -49,16 +52,25 @@ export function AppSidebar() {
           {/* <SidebarGroupLabel>Application</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild size="lg">
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                // Check if the current path matches the item URL
+                // For "/jobs", also match "/jobs/:id" paths
+                const isActive =
+                  location.pathname === item.url ||
+                  (item.url === "/jobs" &&
+                    location.pathname.startsWith("/jobs/"));
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild size="lg" isActive={isActive}>
+                      <Link to={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
