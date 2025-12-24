@@ -11,9 +11,18 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CandidateList from "@/components/CandidateList";
 import UploadResumes from "@/components/UploadResumes";
+import JobDetails from "@/components/JobDetails";
 
 const JobDetailsPage = () => {
   return (
@@ -43,14 +52,19 @@ const JobDetailsPage = () => {
       </Breadcrumb>
       <div className="flex items-baseline gap-2">
         <h1 className="py-3 text-3xl font-bold">Full Stack Developer</h1>
-        <Button
-          size="icon-sm"
-          className={
-            "bg-secondary text-secondary-foreground hover:bg-secondary cursor-pointer rounded-4xl p-0"
-          }
-        >
-          <InfoIcon />
-        </Button>
+        <Sheet className="w-2xl">
+          <SheetTrigger>
+            <Button
+              size="icon-sm"
+              className={
+                "bg-secondary text-secondary-foreground hover:bg-secondary cursor-pointer rounded-4xl p-0"
+              }
+            >
+              <InfoIcon />
+            </Button>
+          </SheetTrigger>
+          <JobDetails />
+        </Sheet>
       </div>
       <p className="mb-3 max-w-3xl text-sm text-neutral-500">
         We’re looking for a Full Stack Developer who enjoys building scalable,
