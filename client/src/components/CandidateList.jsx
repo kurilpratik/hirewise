@@ -18,19 +18,16 @@ const CandidateList = () => {
       return {
         rankText: "text-yellow-900",
         borderColor: "border-yellow-500",
-        bgColor: "bg-yellow-50/30",
       };
     } else if (rank === 2) {
       return {
         rankText: "text-gray-900",
         borderColor: "border-gray-400",
-        bgColor: "bg-gray-50/30",
       };
     } else if (rank === 3) {
       return {
         rankText: "text-amber-900",
         borderColor: "border-amber-500",
-        bgColor: "bg-amber-50/30",
       };
     }
     return {
@@ -54,13 +51,11 @@ const CandidateList = () => {
               asChild
               variant="outline"
               className={
-                isTopThree
-                  ? `${decoration.bgColor} ${decoration.borderColor} border shadow-md`
-                  : ""
+                isTopThree ? `${decoration.borderColor} border shadow-md` : ""
               }
             >
               <Link
-                to={"/jobs/:id"}
+                to={"/candidates/:id"}
                 className="grid w-full grid-cols-[auto_1fr_1fr_1fr_1fr] items-center gap-4"
               >
                 <ItemContent>

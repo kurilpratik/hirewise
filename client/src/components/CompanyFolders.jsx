@@ -2,14 +2,9 @@
 import React from "react";
 import { FOLDERS } from "../data/data";
 import CompanyFolder from "./CompanyFolder";
+import AddJob from "./AddJob";
 
 const CompanyFolders = () => {
-  const handleAddFolder = () => {
-    // TODO: Implement add folder functionality
-    console.log("Add folder clicked");
-    // You can add logic here to open a modal, show a form, etc.
-  };
-
   return (
     <div className="flex flex-wrap gap-6">
       {FOLDERS.map((folder, index) => (
@@ -19,7 +14,7 @@ const CompanyFolders = () => {
           jobs={folder.jobs}
         />
       ))}
-      <CompanyFolder variant="add" onClick={handleAddFolder} />
+      <AddJob />
     </div>
   );
 };
