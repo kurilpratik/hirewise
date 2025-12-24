@@ -20,7 +20,9 @@ const UploadResumes = () => {
     const allowedExtensions = [".pdf", ".txt"];
     const fileName = selectedFile.name.toLowerCase();
     const isValidType = allowedTypes.includes(selectedFile.type);
-    const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+    const isValidExtension = allowedExtensions.some((ext) =>
+      fileName.endsWith(ext),
+    );
 
     if (!isValidType && !isValidExtension) {
       alert("Please select a PDF or text file.");

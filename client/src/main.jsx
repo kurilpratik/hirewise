@@ -7,6 +7,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import HomePage from "./pages/HomePage";
 import JobsPage from "./pages/JobsPage";
 import JobDetailsPage from "./pages/JobDetailsPage";
+import CandidatePage from "./pages/CandidatePage";
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
       { path: "/home", element: <HomePage /> },
       { path: "/jobs", element: <JobsPage /> },
       { path: "/jobs/:id", element: <JobDetailsPage /> },
+      { path: "/candidates/:id", element: <CandidatePage /> },
     ],
   },
 ]);
