@@ -7,7 +7,7 @@ const DashboardLayout = () => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="h-screen w-full rounded-4xl border border-white bg-white">
+      <main className="h-screen w-full rounded-4xl border border-white bg-white px-8 py-2">
         <SidebarTrigger className="block sm:hidden" />
         <Outlet />
       </main>
