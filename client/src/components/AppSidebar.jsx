@@ -15,6 +15,8 @@ import {
 import Logo from "@/components/Logo";
 import { Link, useLocation } from "react-router-dom";
 
+import Tokens from "./Tokens";
+
 // Menu items.
 const items = [
   {
@@ -77,7 +79,10 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-1.5">
+          <SidebarMenuItem className="mb-4">
+            <Tokens consumed={39000} total={100000} />
+          </SidebarMenuItem>
+          <SidebarMenuItem className="mb-2 flex items-center gap-1.5">
             <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-4xl">
               SR
             </div>
