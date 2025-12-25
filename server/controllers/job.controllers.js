@@ -1,4 +1,23 @@
 import Job from "../models/job.model.js";
+import { generateJobDescription } from "../services/generateJDService.js";
+
+export const generateJD = async (req, res) => {
+  try {
+    const { title, company, location, experience } = req.body;
+    const text = await generateJobDescription({
+      title,
+      company,
+      location,
+      experience,
+    });
+    return res.status(200).json({ description: text });
+  } catch (err) {
+    console.error("generate-jd error:", err);
+    return res
+      .status(500)
+      .json({ message: err.message || "Failed to generate job description" });
+  }
+};
 
 export const createJob = async (req, res) => {
   try {

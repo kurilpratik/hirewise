@@ -24,12 +24,13 @@ import CandidateList from "@/components/CandidateList";
 import UploadResumes from "@/components/UploadResumes";
 import JobDetails from "@/components/JobDetails";
 
+import ReactMarkdown from "react-markdown";
+
 const JobDetailsPage = () => {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_DESC_LEN = 250;
 
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -108,28 +109,43 @@ const JobDetailsPage = () => {
               ? "Loading job description..."
               : job?.description
                 ? (() => {
-                    const full = job.description;
+                    const full = job.description || "";
                     const isLong = full.length > MAX_DESC_LEN;
                     const first = isLong ? full.slice(0, MAX_DESC_LEN) : full;
+                    // When truncated, append an inline markdown link that we intercept and render as a button
+                    // Only render truncated text + a "Show more" link that opens the Sheet.
+                    const markdownToRender =
+                      first + (isLong ? " … [Show more](#show-more)" : "");
+
                     return (
-                      <>
-                        <span>{showFullDescription ? full : first}</span>
-                        {isLong && !showFullDescription && (
-                          <span className="text-neutral-400">…</span>
-                        )}
-                        {isLong && (
-                          /* Use an extra SheetTrigger as the "Show more" button so it opens the same sheet.
-                             Also set showFullDescription true so inline text expands when user clicks. */
-                          <SheetTrigger asChild>
-                            <button
-                              type="button"
-                              className="text-primary ml-2 text-sm underline"
-                            >
-                              Show more
-                            </button>
-                          </SheetTrigger>
-                        )}
-                      </>
+                      <ReactMarkdown
+                        components={{
+                          a: ({ href, children, ...props }) => {
+                            if (href === "#show-more") {
+                              // Render the "Show more" link as a SheetTrigger button so it opens the same sheet
+                              return (
+                                <SheetTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="text-primary ml-2 text-sm underline"
+                                    {...props}
+                                  >
+                                    {children}
+                                  </button>
+                                </SheetTrigger>
+                              );
+                            }
+                            // Default anchor behavior for other links
+                            return (
+                              <a href={href} {...props}>
+                                {children}
+                              </a>
+                            );
+                          },
+                        }}
+                      >
+                        {markdownToRender}
+                      </ReactMarkdown>
                     );
                   })()
                 : "No description available for this job."}
