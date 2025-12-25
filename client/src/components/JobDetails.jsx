@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 import { Badge } from "./ui/badge";
 
@@ -14,30 +8,6 @@ const JobDetails = ({ job: jobProp, jobId }) => {
   const [job, setJob] = useState(jobProp || null);
   const [loading, setLoading] = useState(!jobProp && !!jobId);
   const [error, setError] = useState(null);
-
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-  useEffect(() => {
-    if (jobProp) return;
-    if (!jobId) return;
-
-    setLoading(true);
-    setError(null);
-
-    fetch(`${API_BASE}/api/jobs/${jobId}`)
-      .then(async (res) => {
-        const payload = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(payload.message || "Failed to fetch job");
-        return payload;
-      })
-      .then((data) => {
-        setJob(data.job || null);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => setLoading(false));
-  }, [jobId, jobProp]);
 
   const title = job?.title ?? (loading ? "Loading..." : "Unknown Title");
   const company = job?.company ?? "Unknown Company";

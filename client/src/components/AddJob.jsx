@@ -120,6 +120,7 @@ const AddJob = () => {
                 AI
               </DialogDescription>
             </DialogHeader>
+            {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
             {/* Title + Company in one row; Location + Experience in one row */}
             <div className="grid gap-4">

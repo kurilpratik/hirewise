@@ -137,7 +137,7 @@ const JobDetailsPage = () => {
         )}
 
         <SheetContent>
-          <JobDetails jobId={id} />
+          <JobDetails jobId={id} job={job} />
         </SheetContent>
       </Sheet>
 
