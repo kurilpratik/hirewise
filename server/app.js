@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 
 import appsRoutes from "./routes/application.routes.js";
+import jobRoutes from "./routes/job.routes.js";
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/apps", appsRoutes);
+app.use("/api/jobs", jobRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });

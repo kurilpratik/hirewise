@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { InfoIcon, SlashIcon } from "lucide-react";
 import {
   Breadcrumb,
@@ -25,6 +25,35 @@ import UploadResumes from "@/components/UploadResumes";
 import JobDetails from "@/components/JobDetails";
 
 const JobDetailsPage = () => {
+  const { id } = useParams();
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const MAX_DESC_LEN = 250;
+
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+
+    fetch(`${API_BASE}/api/jobs/${id}`)
+      .then(async (res) => {
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(payload.message || "Failed to fetch job");
+        return payload;
+      })
+      .then((data) => {
+        setJob(data.job || null);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
   return (
     <div className="py-2">
       <Breadcrumb>
@@ -46,13 +75,17 @@ const JobDetailsPage = () => {
             <SlashIcon />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbPage>KPMG</BreadcrumbPage>
+            <BreadcrumbPage>{job ? job.company : "Job"}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="flex items-baseline gap-2">
-        <h1 className="py-3 text-3xl font-bold">Full Stack Developer</h1>
-        <Sheet className="w-2xl">
+
+      {/* Move Sheet to wrap both the header and the description so we can add an additional SheetTrigger inside the description */}
+      <Sheet className="w-2xl">
+        <div className="flex items-baseline gap-2">
+          <h1 className="py-3 text-3xl font-bold">
+            {loading ? "Loading..." : job ? job.title : "Job not found"}
+          </h1>
           <SheetTrigger>
             <Button
               size="icon-sm"
@@ -63,15 +96,50 @@ const JobDetailsPage = () => {
               <InfoIcon />
             </Button>
           </SheetTrigger>
-          <JobDetails />
-        </Sheet>
-      </div>
-      <p className="mb-3 max-w-3xl text-sm text-neutral-500">
-        We’re looking for a Full Stack Developer who enjoys building scalable,
-        high-quality web applications end-to-end. You’ll work across frontend,
-        backend, and databases to deliver products that are fast, reliable, and
-        user-focused.
-      </p>
+        </div>
+
+        {error && (
+          <p className="mb-3 max-w-3xl text-sm text-red-500">Error: {error}</p>
+        )}
+
+        {!error && (
+          <p className="mb-3 max-w-3xl text-sm text-neutral-500">
+            {loading
+              ? "Loading job description..."
+              : job?.description
+                ? (() => {
+                    const full = job.description;
+                    const isLong = full.length > MAX_DESC_LEN;
+                    const first = isLong ? full.slice(0, MAX_DESC_LEN) : full;
+                    return (
+                      <>
+                        <span>{showFullDescription ? full : first}</span>
+                        {isLong && !showFullDescription && (
+                          <span className="text-neutral-400">…</span>
+                        )}
+                        {isLong && (
+                          /* Use an extra SheetTrigger as the "Show more" button so it opens the same sheet.
+                             Also set showFullDescription true so inline text expands when user clicks. */
+                          <SheetTrigger asChild>
+                            <button
+                              type="button"
+                              className="text-primary ml-2 text-sm underline"
+                            >
+                              Show more
+                            </button>
+                          </SheetTrigger>
+                        )}
+                      </>
+                    );
+                  })()
+                : "No description available for this job."}
+          </p>
+        )}
+
+        <SheetContent>
+          <JobDetails jobId={id} job={job} />
+        </SheetContent>
+      </Sheet>
 
       <Tabs defaultValue="candidates" className={"mt-4"}>
         <TabsList className={"mb-2"}>
@@ -79,10 +147,10 @@ const JobDetailsPage = () => {
           <TabsTrigger value="resumes">Upload Resumes</TabsTrigger>
         </TabsList>
         <TabsContent value="candidates">
-          <CandidateList />
+          <CandidateList jobId={id} />
         </TabsContent>
         <TabsContent value="resumes">
-          <UploadResumes />
+          <UploadResumes jobId={id} />
         </TabsContent>
       </Tabs>
     </div>

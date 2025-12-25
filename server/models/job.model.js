@@ -14,6 +14,7 @@ const jobSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Company name cannot exceed 100 characters"],
     },
+
     description: {
       type: String,
       required: [true, "Job description is required"],
@@ -48,6 +49,12 @@ const jobSchema = new mongoose.Schema(
       },
       default: "draft",
     },
+
+    // Added applications reference array
+    applications: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Application" }],
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -71,7 +78,7 @@ jobSchema.pre("save", function (next) {
       .map((skill) => skill.trim())
       .filter((skill) => skill.length > 0);
   }
-  next();
+  if (typeof next === "function") next();
 });
 
 // Virtual for checking if job is open
