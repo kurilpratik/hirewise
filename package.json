@@ -4,8 +4,9 @@
   "description": "AI-Enabled Job Resume Intelligence Platform",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon server/server.js",
-    "start": "node server/server.js"
+    "dev": "cross-env NODE_ENV=development nodemon server/server.js",
+    "start": "cross-env NODE_ENV=production node server/server.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "validator": "^13.15.26"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "nodemon": "^3.1.11",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.0"
