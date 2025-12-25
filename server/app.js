@@ -1,6 +1,4 @@
-// src/app.js
 import express from "express";
-import cors from "cors";
 
 import appsRoutes from "./routes/application.routes.js";
 import jobRoutes from "./routes/job.routes.js";
