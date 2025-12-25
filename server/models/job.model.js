@@ -71,7 +71,7 @@ jobSchema.pre("save", function (next) {
       .map((skill) => skill.trim())
       .filter((skill) => skill.length > 0);
   }
-  next();
+  if (typeof next === "function") next();
 });
 
 // Virtual for checking if job is open

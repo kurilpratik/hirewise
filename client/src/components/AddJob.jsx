@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 
 import {
   Dialog,
@@ -20,19 +21,63 @@ import { Textarea } from "./ui/textarea";
 import { Sparkles } from "lucide-react";
 
 const AddJob = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // set backend base URL via Vite env var (create .env with VITE_API_URL) or fallback
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
   const handleAddFolder = () => {
     console.log("Add folder clicked");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
     const formData = new FormData(e.target);
     const jobData = {
       title: formData.get("title"),
       company: formData.get("company"),
       description: formData.get("description"),
     };
-    console.log("Job Data:", jobData);
+
+    // Basic client-side validation
+    if (!jobData.title || !jobData.company || !jobData.description) {
+      setError("Title, company and description are required.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/jobs/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jobData),
+      });
+
+      const payload = await res.json();
+
+      if (!res.ok) {
+        const msg = payload?.message || "Failed to create job";
+        const details = payload?.errors ? `: ${payload.errors.join(", ")}` : "";
+        throw new Error(msg + details);
+      }
+
+      // Success - reset form and give feedback
+      e.target.reset();
+      alert("Job created successfully.");
+      console.log("Created job:", payload.job || payload);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+
+    // console.log("Job Data:", jobData);
   };
 
   return (
