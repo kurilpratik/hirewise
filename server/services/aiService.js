@@ -2,7 +2,6 @@ import OpenAI from "openai";
 import "dotenv/config";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-console.log(OPENROUTER_API_KEY);
 if (!OPENROUTER_API_KEY) {
   throw new Error("OPENROUTER_API_KEY is not set in environment");
 }
