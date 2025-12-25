@@ -27,7 +27,7 @@ export async function generateJobDescription({
   const systemMessage = {
     role: "system",
     content:
-      "You are an expert HR copywriter. Produce a clear, professional job description targeted to HR and hiring teams. Include a short summary, responsibilities (bullet list), required qualifications (bullet list), preferred qualifications (if any), and a short section on benefits and how to apply. Keep it concise and suitable for posting or internal use.",
+      "You are an expert HR copywriter. Produce a clear, professional job description targeted to HR and hiring teams. Include a short summary, responsibilities (bullet list), details of the tech stack required qualifications (bullet list), preferred qualifications (if any), and a short section on benefits and how to apply. Keep it concise and suitable for posting or internal use. Start right away with the Summary",
   };
 
   const userMessage = {

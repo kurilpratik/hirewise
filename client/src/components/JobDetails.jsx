@@ -4,6 +4,9 @@ import { SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 import { Badge } from "./ui/badge";
 
+import ReactMarkdown from "react-markdown";
+import { cleanMarkdown } from "@/lib/cleanMarkdown";
+
 const JobDetails = ({ job: jobProp, jobId }) => {
   const [job, setJob] = useState(jobProp || null);
   const [loading, setLoading] = useState(!jobProp && !!jobId);
@@ -19,8 +22,10 @@ const JobDetails = ({ job: jobProp, jobId }) => {
   const description =
     job?.description ?? "No description available for this job.";
 
+  const cleanedDescription = cleanMarkdown(description);
+
   return (
-    <SheetContent>
+    <SheetContent className={"overflow-y-scroll"}>
       <div className="p-4">
         <SheetTitle className={"mb-1 text-3xl"}>{title}</SheetTitle>
 
@@ -53,8 +58,19 @@ const JobDetails = ({ job: jobProp, jobId }) => {
 
         <h5 className="my-2 text-lg">Job Description</h5>
         {error && <p className="text-sm text-red-500">Error: {error}</p>}
-        <div className="space-y-4 text-sm whitespace-pre-wrap">
-          <p>{description}</p>
+        <div className="text-sm leading-7">
+          {/* <p>{description}</p> */}
+          <ReactMarkdown
+            components={{
+              strong: ({ children }) => (
+                <strong className="">{children}</strong>
+              ),
+              p: ({ children }) => <p className="">{children}</p>,
+              li: ({ children }) => <li className="">{children}</li>,
+            }}
+          >
+            {cleanedDescription}
+          </ReactMarkdown>
         </div>
       </div>
     </SheetContent>
