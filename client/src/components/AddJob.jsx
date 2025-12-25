@@ -28,6 +28,9 @@ const AddJob = () => {
   // control dialog open state so we can close it programmatically
   const [open, setOpen] = useState(false);
 
+  // controlled description so we can programmatically set it after generation
+  const [description, setDescription] = useState("");
+
   const navigate = useNavigate();
 
   // set backend base URL via Vite env var (create .env with VITE_API_URL) or fallback
@@ -35,6 +38,49 @@ const AddJob = () => {
 
   const handleAddFolder = () => {
     console.log("Add folder clicked");
+  };
+
+  const handleLoadJD = async () => {
+    setError(null);
+    // read current form values
+    const title = document.getElementById("title")?.value?.trim();
+    const company = document.getElementById("company")?.value?.trim();
+    const location = document.getElementById("location")?.value?.trim();
+    const experience = document.getElementById("experience")?.value?.trim();
+
+    if (!title || !company) {
+      setError("Title and Company are required to generate a JD.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/jobs/generate-jd`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title, company, location, experience }),
+      });
+
+      const payload = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          payload?.message || "Failed to generate job description",
+        );
+      }
+
+      // populate description textarea
+      setDescription(payload.description || "");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.message || "An unexpected error occurred while generating JD",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -47,7 +93,7 @@ const AddJob = () => {
       company: formData.get("company"),
       location: formData.get("location"), // added
       experience: formData.get("experience"), // added
-      description: formData.get("description"),
+      description: description || formData.get("description"),
     };
 
     // Basic client-side validation
@@ -76,6 +122,7 @@ const AddJob = () => {
 
       // Success - reset form, close dialog and redirect to new job details
       e.target.reset();
+      setDescription("");
 
       // try to get created id from response
       const newId =
@@ -176,18 +223,25 @@ const AddJob = () => {
                   placeholder="Enter the job description manually or load one using AI"
                   required
                   className={"mb-6 h-40"}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
             </div>
 
             <DialogFooter>
-              {/* <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose> */}
-              <Button variant="outline">
-                Load JD <Sparkles />
+              {/* Load JD is a button (not submit) and disabled while loading */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleLoadJD}
+                disabled={loading}
+              >
+                {loading ? "Loading…" : "Load JD"} <Sparkles />
               </Button>
-              <Button type="submit">Add Job</Button>
+              <Button type="submit" disabled={loading}>
+                Add Job
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
