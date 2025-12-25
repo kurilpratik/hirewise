@@ -39,6 +39,16 @@ const CandidateList = () => {
     };
   };
 
+  const DATA = false;
+
+  if (!DATA) {
+    return (
+      <div className="flex w-full max-w-5xl p-4 text-sm text-neutral-600">
+        No applications present to be ranked
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full max-w-5xl flex-col gap-4">
       <ItemGroup className={"gap-4"}>
@@ -53,6 +63,7 @@ const CandidateList = () => {
               className={
                 isTopThree ? `${decoration.borderColor} border shadow-md` : ""
               }
+              key={candidate.id || candidate.rank + candidate.name}
             >
               <Link
                 to={"/candidates/:id"}
@@ -63,9 +74,6 @@ const CandidateList = () => {
                     <ItemTitle
                       className={`font-faustina rounded-lg px-3 py-2 pr-4 text-xl font-bold ${decoration.rankText} flex min-w-[60px] items-center justify-center gap-2`}
                     >
-                      {/* {isTopThree && (
-                        <span className="text-2xl">{decoration.icon}</span>
-                      )} */}
                       <span>{candidate.rank}</span>
                     </ItemTitle>
                   </div>

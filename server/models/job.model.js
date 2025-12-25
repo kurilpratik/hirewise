@@ -14,6 +14,7 @@ const jobSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Company name cannot exceed 100 characters"],
     },
+
     description: {
       type: String,
       required: [true, "Job description is required"],
@@ -47,6 +48,12 @@ const jobSchema = new mongoose.Schema(
         message: "{VALUE} is not a valid status",
       },
       default: "draft",
+    },
+
+    // Added applications reference array
+    applications: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Application" }],
+      default: [],
     },
   },
   {
