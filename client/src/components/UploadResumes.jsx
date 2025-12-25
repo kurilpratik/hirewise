@@ -11,7 +11,12 @@ import {
 const UploadResumes = () => {
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+
+  // set backend base URL via Vite env var (create .env with VITE_API_URL) or fallback
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleFileSelect = (selectedFile) => {
     if (!selectedFile) return;
@@ -71,6 +76,42 @@ const UploadResumes = () => {
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleSubmit = async () => {
+    if (!file) {
+      alert("No file selected.");
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      // key name should match what your server expects (e.g. 'resume' or 'file')
+      formData.append("file", file);
+
+      const res = await fetch(`${API_BASE}/api/apps/create`, {
+        method: "POST",
+        body: formData,
+        // do NOT set Content-Type header for multipart/form-data
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Upload failed: ${res.status}`);
+      }
+      const data = await res.json();
+      // handle success (data depends on your backend)
+      alert("Upload successful");
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err) {
+      setError(err.message || "Upload error");
+      alert("Upload error: " + (err.message || ""));
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -133,6 +174,14 @@ const UploadResumes = () => {
                 >
                   <X className="size-3 text-white" />
                 </button>
+
+                <Button
+                  onClick={handleSubmit}
+                  disabled={uploading}
+                  className="ml-2"
+                >
+                  {uploading ? "Uploading..." : "Submit"}
+                </Button>
               </div>
             </div>
           )}
