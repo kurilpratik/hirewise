@@ -20,7 +20,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-const CandidateInfo = () => {
+const ApplicationInfo = () => {
   // Sample candidate details - replace with actual candidate data from props/state/API
   const candidateDetails = {
     email: "pratikkurilworks@gmail.com",
@@ -105,4 +105,4 @@ const CandidateInfo = () => {
   );
 };
 
-export default CandidateInfo;
+export default ApplicationInfo;

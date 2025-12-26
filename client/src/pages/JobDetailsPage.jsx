@@ -20,13 +20,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import CandidateList from "@/components/CandidateList";
+import CandidateList from "@/components/applications/ApplicationList";
 import UploadResumes from "@/components/UploadResumes";
 import JobDetails from "@/components/JobDetails";
 
 import ReactMarkdown from "react-markdown";
 import PageHeader from "@/layouts/PageHeader";
-import { DialogTitle } from "@/components/ui/dialog";
 
 const JobDetailsPage = () => {
   const { id } = useParams();

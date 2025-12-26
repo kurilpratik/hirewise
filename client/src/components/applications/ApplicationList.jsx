@@ -7,12 +7,12 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "./ui/item";
+} from "../ui/item";
 
 import { CANDIDATELIST } from "@/data/data";
 import { Link } from "react-router-dom";
 
-const CandidateList = () => {
+const ApplicationList = () => {
   const getRankDecoration = (rank) => {
     if (rank === 1) {
       return {
@@ -66,7 +66,7 @@ const CandidateList = () => {
               key={candidate.id || candidate.rank + candidate.name}
             >
               <Link
-                to={"/candidates/:id"}
+                to={"/applications/:id"}
                 className="grid w-full grid-cols-[auto_1fr_1fr_1fr_1fr] items-center gap-4"
               >
                 <ItemContent>
@@ -134,4 +134,4 @@ const CandidateList = () => {
   );
 };
 
-export default CandidateList;
+export default ApplicationList;

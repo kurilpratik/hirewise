@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const CandidateRank = () => {
+const ApplicationRank = () => {
   // Sample data - replace with actual candidate data from props/state/API
   const candidateRank = {
     rank: 1,
@@ -57,4 +57,4 @@ const CandidateRank = () => {
   );
 };
 
-export default CandidateRank;
+export default ApplicationRank;

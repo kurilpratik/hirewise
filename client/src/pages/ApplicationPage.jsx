@@ -11,11 +11,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-import CandidateRank from "@/components/CandidateRank";
-import CandidateInfo from "@/components/CandidateInfo";
-import CandidateTextual from "@/components/CandidateTextual";
+import ApplicationRank from "@/components/applications/ApplicationRank";
+import ApplicationInfo from "@/components/applications/ApplicationInfo";
+import ApplicationTextual from "@/components/applications/ApplicationTextual";
 
-const CandidatePage = () => {
+const ApplicationPage = () => {
   return (
     <div>
       <Breadcrumb>
@@ -54,16 +54,16 @@ const CandidatePage = () => {
       <section className="flex">
         {/* CARDS */}
         <div className="flex flex-1 flex-col gap-8">
-          <CandidateRank />
-          <CandidateInfo />
+          <ApplicationRank />
+          <ApplicationInfo />
         </div>
         {/* TEXTUAL */}
         <div className="textual flex-1">
-          <CandidateTextual />
+          <ApplicationTextual />
         </div>
       </section>
     </div>
   );
 };
 
-export default CandidatePage;
+export default ApplicationPage;

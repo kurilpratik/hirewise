@@ -1,8 +1,8 @@
 import React from "react";
 
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 
-const CandidateTextual = () => {
+const ApplicationTextual = () => {
   return (
     <div>
       <div className="max-w-md py-4">
@@ -51,4 +51,4 @@ const CandidateTextual = () => {
   );
 };
 
-export default CandidateTextual;
+export default ApplicationTextual;
