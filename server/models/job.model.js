@@ -41,6 +41,26 @@ const jobSchema = new mongoose.Schema(
         message: "Skills cannot contain empty strings",
       },
     },
+    // Skill generation fields
+    topSkill: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: [100, "Top skill cannot exceed 100 characters"],
+    },
+    skillsGenerated: {
+      type: Boolean,
+      default: false,
+    },
+    skillGenerationStatus: {
+      type: String,
+      enum: ["pending", "processing", "done", "failed"],
+      default: "pending",
+    },
+    skillGenerationError: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
       enum: {
