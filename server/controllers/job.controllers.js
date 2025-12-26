@@ -1,5 +1,6 @@
 import Job from "../models/job.model.js";
 import { generateJobDescription } from "../services/generateJDService.js";
+import { generateAndSaveSkillsJob } from "../services/jobSkillGenerationService.js";
 
 export const generateJD = async (req, res) => {
   try {
@@ -52,7 +53,24 @@ export const createJob = async (req, res) => {
 
     const job = await Job.create(jobData);
 
-    return res.status(201).json({ message: "Job created", job });
+    // Return immediately to the client
+    res.status(201).json({ message: "Job created", job });
+
+    // Fire-and-forget skill generation in same process (non-blocking)
+    // Use setImmediate to avoid blocking the response cycle and catch rejections.
+    setImmediate(() => {
+      generateAndSaveSkillsJob(job._id, {
+        title,
+        company,
+        description,
+        location,
+        experience,
+      }).catch((err) => {
+        console.error("Background skill generation error (unhandled):", err);
+      });
+    });
+
+    return;
   } catch (err) {
     if (err.name === "ValidationError") {
       const errors = Object.values(err.errors).map((e) => e.message);
