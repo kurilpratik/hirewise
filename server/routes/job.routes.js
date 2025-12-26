@@ -5,7 +5,7 @@ import {
   generateJD,
   getJobs,
 } from "../controllers/job.controllers.js";
-import { generateAndSaveSkillsJob } from "../services/jobSkillGenerationService.js";
+import { generateAndSaveSkillsJob } from "../services/job/jobSkillGenerationService.js";
 
 const router = express.Router();
 

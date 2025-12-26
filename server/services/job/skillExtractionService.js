@@ -52,7 +52,7 @@ export async function extractSkills(text = "", opts = {}) {
   // If OpenRouter key present, attempt a small prompt via the SDK
   if (process.env.OPENROUTER_API_KEY) {
     try {
-      const { ai } = await import("./aiService.js");
+      const { ai } = await import("../aiService.js");
       const prompt = `Extract ${min}-${max} distinct most-relevant skills/technologies from the following job text. Return final answer as a comma-separated list only.\n\n---\n${input}\n\nList:`;
       const model =
         process.env.OPENROUTER_MODEL ||

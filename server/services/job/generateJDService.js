@@ -1,4 +1,4 @@
-import { ai } from "./aiService.js";
+import { ai } from "../aiService.js";
 
 /**
  * Generate a job description for HR use.

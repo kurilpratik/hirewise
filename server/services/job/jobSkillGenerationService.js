@@ -2,7 +2,7 @@
  * Generate skills required from the job description and save it to the Job document.
  * Safe for in-process background call. Handles status updates on the job doc.
  */
-import Job from "../models/job.model.js";
+import Job from "../../models/job.model.js";
 import { extractSkills } from "./skillExtractionService.js";
 import { rankSkills } from "./topSkillExtractionService.js";
 

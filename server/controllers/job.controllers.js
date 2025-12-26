@@ -1,6 +1,6 @@
 import Job from "../models/job.model.js";
-import { generateJobDescription } from "../services/generateJDService.js";
-import { generateAndSaveSkillsJob } from "../services/jobSkillGenerationService.js";
+import { generateJobDescription } from "../services/job/generateJDService.js";
+import { generateAndSaveSkillsJob } from "../services/job/jobSkillGenerationService.js";
 
 export const generateJD = async (req, res) => {
   try {
