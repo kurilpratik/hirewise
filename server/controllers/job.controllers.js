@@ -84,3 +84,53 @@ export const getJob = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getJobs = async (req, res) => {
+  try {
+    // Query params
+    const { page: pageQ, limit: limitQ, homepage, status, q } = req.query;
+
+    // If homepage query param is present and truthy, force limit to 5
+    const isHomepage = String(homepage || "").toLowerCase() === "true";
+
+    const defaultLimit = isHomepage ? 5 : 10;
+
+    const page = Math.max(1, parseInt(pageQ, 10) || 1);
+    const limit = Math.max(1, parseInt(limitQ, 10) || defaultLimit);
+
+    // Build filter - allow filtering by status and a simple text search (title/company)
+    const filter = {};
+    if (status) filter.status = status;
+    if (q) {
+      // Perform a simple OR text search on title and company
+      const regex = new RegExp(q, "i");
+      filter.$or = [{ title: regex }, { company: regex }];
+    }
+
+    const total = await Job.countDocuments(filter);
+
+    const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
+
+    // If requested page is beyond totalPages, return empty array but valid meta
+    const skip = (page - 1) * limit;
+
+    const jobs = await Job.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    return res.status(200).json({
+      jobs,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    });
+  } catch (err) {
+    console.error("get-jobs error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

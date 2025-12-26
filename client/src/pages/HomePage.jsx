@@ -17,7 +17,7 @@ const HomePage = () => {
       <Separator />
       <section>
         <h3 className="font-poppins pt-4 pb-8 uppercase">All Jobs</h3>
-        <JobList />
+        <JobList homepage="false" />
       </section>
     </>
   );
