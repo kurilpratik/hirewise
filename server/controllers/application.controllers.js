@@ -1,5 +1,14 @@
+import { Queue } from "bullmq";
+
 import Application from "../models/application.model.js";
 import { processAndCreateApplication } from "../services/applications/processAndCreateApplicationService.js";
+
+const applicationQueue = new Queue("application", {
+  connection: {
+    host: "localhost",
+    port: 6379, //valkey port
+  },
+});
 
 export const createApplication = async (req, res) => {
   try {
@@ -17,6 +26,13 @@ export const createApplication = async (req, res) => {
     const applicationDoc = await processAndCreateApplication({
       file: req.file,
       jobId,
+    });
+
+    // Create a queue job to save application to DB asynchronously
+    // passing data to the worker
+    await applicationQueue.add("file-ready", {
+      jobId,
+      file: req.file,
     });
 
     return res.status(201).json({
