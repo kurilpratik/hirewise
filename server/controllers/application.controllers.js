@@ -28,6 +28,8 @@ export const createApplication = async (req, res) => {
       jobId,
     });
 
+    console.log("Processed application document:", applicationDoc);
+
     // Create a queue job to save application to DB asynchronously
     // passing data to the worker
     await applicationQueue.add("file-ready", {
