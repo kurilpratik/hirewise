@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // changed code
 
 const UploadResumes = () => {
   const [file, setFile] = useState(null);
@@ -16,6 +16,7 @@ const UploadResumes = () => {
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
   const { id } = useParams();
+  const navigate = useNavigate(); // changed code
   const jobId = id || "";
 
   // set backend base URL via Vite env var (create .env with VITE_API_URL) or fallback
@@ -108,7 +109,11 @@ const UploadResumes = () => {
       const data = await res.json();
       console.log("Upload response data:", data);
       // handle success (data depends on your backend)
-      alert("Upload successful");
+      // on success, redirect to the newly created application's page
+      if (data && data.application && data.application._id) {
+        navigate(`/applications/${data.application._id}`); // changed code
+      }
+
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
