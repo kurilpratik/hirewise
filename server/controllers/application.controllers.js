@@ -174,6 +174,40 @@ export const createApplication = async (req, res) => {
       file: req.file,
     });
 
+    // Recalculate ranks for all applications of this job (dense ranking)
+    try {
+      const apps = await Application.find({ jobId }).select("_id score").lean();
+      if (apps.length) {
+        // sort descending by score (treat missing score as 0)
+        apps.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+        let densePos = 0;
+        let lastScore = null;
+        let currentRank = 0;
+        const bulkOps = [];
+
+        for (const app of apps) {
+          densePos++;
+          if (lastScore === null || app.score !== lastScore) {
+            currentRank = densePos;
+            lastScore = app.score;
+          }
+          bulkOps.push({
+            updateOne: {
+              filter: { _id: app._id },
+              update: { $set: { rank: currentRank } },
+            },
+          });
+        }
+
+        if (bulkOps.length) {
+          await Application.bulkWrite(bulkOps);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to update application ranks:", err?.message || err);
+    }
+
     const updatedApplication = await Application.findById(
       createdApplication._id,
     );
