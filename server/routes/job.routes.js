@@ -4,6 +4,7 @@ import {
   getJob,
   generateJD,
   getJobs,
+  getApplicationStatsForJob, // added
 } from "../controllers/job.controllers.js";
 import { generateAndSaveSkillsJob } from "../services/job/jobSkillGenerationService.js";
 
@@ -12,6 +13,10 @@ const router = express.Router();
 router.post("/create", createJob);
 router.post("/generate-jd", generateJD);
 router.get("/", getJobs);
+
+// Add this before the dynamic `/:id` route so it isn't swallowed by it
+router.get("/:id/apps/stats", getApplicationStatsForJob);
+
 // dynamic id route must come last to avoid catching other named routes
 router.get("/:id", getJob);
 

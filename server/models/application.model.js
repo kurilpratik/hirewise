@@ -323,7 +323,7 @@ applicationSchema.statics.getTopCandidatesForJob = function (
 // Static methods - Statistics and utilities
 applicationSchema.statics.getApplicationStats = async function (jobId) {
   const stats = await this.aggregate([
-    { $match: { jobId: mongoose.Types.ObjectId(jobId) } },
+    { $match: { jobId: new mongoose.Types.ObjectId(jobId) } },
     {
       $group: {
         _id: null,

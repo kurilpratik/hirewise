@@ -20,21 +20,26 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-const ApplicationInfo = () => {
-  // Sample candidate details - replace with actual candidate data from props/state/API
-  const candidateDetails = {
-    email: "pratikkurilworks@gmail.com",
-    phone: "+91 74588 17555",
-    location: "Noida",
-    background: "Software Engineer",
-    resumeUrl: "/resumes/pratik-kuril-resume.pdf",
-  };
+const ApplicationInfo = ({ application = {} }) => {
+  const candidate = application?.candidate || {};
+  const email = candidate.email || application.email || "";
+  const phone = candidate.phone || application.phone || "";
+  const location =
+    candidate.location ||
+    candidate.city ||
+    application.location ||
+    application.city ||
+    "Unknown";
+  const background = candidate.background || "Not specified";
+  const resumeUrl = candidate.resumePath || null;
+  const name = candidate.name || application.name || "Candidate";
+
   return (
     <div>
       <Card className="max-w-md">
         <CardHeader>
           <CardTitle className="font-faustina mb-1 text-4xl font-bold">
-            {/* Candidate Details */}
+            {name}
           </CardTitle>
           <CardDescription className="text-xs font-semibold text-neutral-400 uppercase">
             CONTACT & INFORMATION
@@ -46,58 +51,62 @@ const ApplicationInfo = () => {
               <Mail className="size-4 text-neutral-400" />
               <span className="text-sm">Email</span>
             </div>
-            <a
-              href={`mailto:${candidateDetails.email}`}
-              className="text-sm font-semibold text-blue-600 hover:underline"
-            >
-              {candidateDetails.email}
-            </a>
+            {email ? (
+              <a
+                href={`mailto:${email}`}
+                className="text-sm font-semibold text-blue-600 hover:underline"
+              >
+                {email}
+              </a>
+            ) : (
+              <span className="text-sm text-neutral-500">—</span>
+            )}
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Phone className="size-4 text-neutral-400" />
               <span className="text-sm">Phone</span>
             </div>
-            <a
-              href={`tel:${candidateDetails.phone}`}
-              className="text-sm font-semibold text-blue-600 hover:underline"
-            >
-              {candidateDetails.phone}
-            </a>
+            {phone ? (
+              <a
+                href={`tel:${phone}`}
+                className="text-sm font-semibold text-blue-600 hover:underline"
+              >
+                {phone}
+              </a>
+            ) : (
+              <span className="text-sm text-neutral-500">—</span>
+            )}
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MapPin className="size-4 text-neutral-400" />
               <span className="text-sm">Location</span>
             </div>
-            <span className="text-sm font-semibold">
-              {candidateDetails.location}
-            </span>
+            <span className="text-sm font-semibold">{location}</span>
           </div>
           <div className="flex items-center justify-between border-t pt-2">
             <div className="flex items-center gap-2">
               <Briefcase className="size-4 text-neutral-400" />
               <span className="text-sm">Background</span>
             </div>
-            <span className="text-sm font-semibold">
-              {candidateDetails.background}
-            </span>
+            <span className="text-right text-xs">{background}</span>
           </div>
           <div className="flex items-center justify-between border-t pt-2">
             <div className="flex items-center gap-2">
               <FileText className="size-4 text-neutral-400" />
               <span className="text-sm">Resume</span>
             </div>
-            <Button asChild variant="secondary" size="sm" className="gap-2">
-              <a
-                href={candidateDetails.resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLink />
-                View
-              </a>
-            </Button>
+            {resumeUrl ? (
+              <Button asChild variant="secondary" size="sm" className="gap-2">
+                <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink />
+                  View
+                </a>
+              </Button>
+            ) : (
+              <span className="text-sm text-neutral-500">Not uploaded</span>
+            )}
           </div>
         </CardContent>
       </Card>
