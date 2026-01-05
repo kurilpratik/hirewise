@@ -10,8 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 import {
-  InfoIcon,
-  SlashIcon,
   FileText,
   Mail,
   Phone,

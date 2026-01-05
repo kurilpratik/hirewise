@@ -28,7 +28,7 @@ const ApplicationRank = ({ application = {} }) => {
         const res = await fetch(`${API_BASE}/api/jobs/${id}/apps/stats`);
         if (!res.ok) throw new Error("Failed to fetch application statistics");
         const payload = await res.json();
-        console.log("Application stats payload:", payload);
+        // console.log("Application stats payload:", payload);
         setTotalApplications(payload?.stats?.totalApplications ?? 0);
       } catch (err) {
         console.error("Fetch application stats error:", err);
