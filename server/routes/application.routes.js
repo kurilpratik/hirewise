@@ -2,6 +2,7 @@ import express from "express";
 import {
   createApplication,
   getApplicationById,
+  getApplicationsByJobId,
 } from "../controllers/application.controllers.js";
 import { multerErrorHandler, uploadSingle } from "../middleware/upload.midd.js";
 
@@ -14,5 +15,7 @@ router.post("/create", uploadSingle, createApplication);
 router.use(multerErrorHandler);
 
 router.get("/:id", getApplicationById);
+
+router.get("/job/:jobId", getApplicationsByJobId);
 
 export default router;

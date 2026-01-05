@@ -14,6 +14,7 @@ import {
 import ApplicationRank from "@/components/applications/ApplicationRank";
 import ApplicationInfo from "@/components/applications/ApplicationInfo";
 import ApplicationTextual from "@/components/applications/ApplicationTextual";
+import PageHeader from "@/layouts/PageHeader";
 
 const ApplicationPage = () => {
   const { id } = useParams();
@@ -59,54 +60,58 @@ const ApplicationPage = () => {
   const jobId = application?.jobId || application?.job_id || null;
 
   return (
-    <div className="px-4 py-2">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to={"/home"}>Home</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <SlashIcon />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to={"/jobs"}>All Jobs</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <SlashIcon />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to={`/jobs/${jobId || "unknown"}`}>
-                {jobId || "Unknown Job"}
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <SlashIcon />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbPage>{candidate.name || "Candidate"}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="py-2">
+      <PageHeader>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to={"/home"}>Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <SlashIcon />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to={"/jobs"}>All Jobs</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <SlashIcon />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to={`/jobs/${jobId || "unknown"}`}>
+                  {jobId || "Unknown Job"}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <SlashIcon />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbPage>{candidate.name || "Candidate"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-      {loading ? (
-        <h1 className="py-3 text-2xl font-medium">Loading application…</h1>
-      ) : error ? (
-        <h1 className="py-3 text-2xl font-medium text-red-600">
-          Error: {error}
-        </h1>
-      ) : (
-        <>
+        {loading ? (
+          <h1 className="py-3 text-2xl font-medium">Loading application…</h1>
+        ) : error ? (
+          <h1 className="py-3 text-2xl font-medium text-red-600">
+            Error: {error}
+          </h1>
+        ) : (
           <h1 className="py-3 text-3xl font-bold">
             {candidate.name || "Unknown Candidate"}
           </h1>
+        )}
+      </PageHeader>
 
-          <section className="flex">
+      {!loading && !error && (
+        <>
+          <section className="flex px-8">
             {/* CARDS */}
             <div className="flex flex-1 flex-col gap-8">
               <div>

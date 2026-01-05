@@ -241,3 +241,15 @@ export const getApplicationById = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
+
+export const getApplicationsByJobId = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    // Return applications ordered by rank ascending
+    const applications = await Application.find({ jobId }).sort({ rank: 1 });
+    return res.status(200).json({ applications });
+  } catch (error) {
+    console.error("getApplicationsByJobId error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
