@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { useParams, useNavigate } from "react-router-dom"; // changed code
 
 const UploadResumes = () => {
   const [file, setFile] = useState(null);
@@ -14,6 +15,9 @@ const UploadResumes = () => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+  const { id } = useParams();
+  const navigate = useNavigate(); // changed code
+  const jobId = id || "";
 
   // set backend base URL via Vite env var (create .env with VITE_API_URL) or fallback
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -91,6 +95,7 @@ const UploadResumes = () => {
       const formData = new FormData();
       // key name should match what your server expects (e.g. 'resume' or 'file')
       formData.append("file", file);
+      formData.append("jobId", jobId);
 
       const res = await fetch(`${API_BASE}/api/apps/create`, {
         method: "POST",
@@ -102,8 +107,13 @@ const UploadResumes = () => {
         throw new Error(text || `Upload failed: ${res.status}`);
       }
       const data = await res.json();
+      console.log("Upload response data:", data);
       // handle success (data depends on your backend)
-      alert("Upload successful");
+      // on success, redirect to the newly created application's page
+      if (data && data.application && data.application._id) {
+        navigate(`/applications/${data.application._id}`); // changed code
+      }
+
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {

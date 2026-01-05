@@ -1,4 +1,5 @@
 import Job from "../models/job.model.js";
+import Application from "../models/application.model.js";
 import { generateJobDescription } from "../services/job/generateJDService.js";
 import { generateAndSaveSkillsJob } from "../services/job/jobSkillGenerationService.js";
 
@@ -149,6 +150,20 @@ export const getJobs = async (req, res) => {
     });
   } catch (err) {
     console.error("get-jobs error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getApplicationStatsForJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Job id is required" });
+    }
+    const stats = await Application.getApplicationStats(id); // uses Application.getApplicationStats
+    return res.status(200).json({ stats });
+  } catch (err) {
+    console.error("getApplicationStats error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };

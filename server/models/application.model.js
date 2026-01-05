@@ -4,7 +4,7 @@ import validator from "validator";
 const applicationSchema = new mongoose.Schema(
   {
     jobId: {
-      type: new mongoose.Schema.Types.ObjectId(),
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Job",
       required: [true, "Job reference is required"],
       index: true,
@@ -161,11 +161,14 @@ const applicationSchema = new mongoose.Schema(
 );
 
 // Compound indexes for performance
-applicationSchema.index({ jobId: 1, "candidate.email": 1 }, { unique: true }); // Prevent duplicate applications
+applicationSchema.index(
+  { jobId: 1, "candidate.email": 1 },
+  { unique: false, background: true },
+); // allow duplicate candidate emails per job
 applicationSchema.index({ jobId: 1, score: -1 }); // Get top candidates for a job
 
 // Pre-save middleware to clean and normalize data
-applicationSchema.pre("save", function (next) {
+applicationSchema.pre("save", function () {
   // Clean up candidate extractedSkills
   if (
     this.candidate.extractedSkills &&
@@ -217,8 +220,6 @@ applicationSchema.pre("save", function (next) {
   if (this.candidate.phone) {
     this.candidate.phone = this.candidate.phone.trim().replace(/\s+/g, " ");
   }
-
-  next();
 });
 
 // Virtuals - Application
@@ -322,7 +323,7 @@ applicationSchema.statics.getTopCandidatesForJob = function (
 // Static methods - Statistics and utilities
 applicationSchema.statics.getApplicationStats = async function (jobId) {
   const stats = await this.aggregate([
-    { $match: { jobId: mongoose.Types.ObjectId(jobId) } },
+    { $match: { jobId: new mongoose.Types.ObjectId(jobId) } },
     {
       $group: {
         _id: null,
