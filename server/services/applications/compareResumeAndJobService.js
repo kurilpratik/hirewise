@@ -1,4 +1,44 @@
-import { ai } from "../aiService.js";
+import { ai, JSON_COMPLETION_PARAMS } from "../aiService.js";
+
+function normalizeAiResponseText(value) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeAiResponseText(item))
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  if (value && typeof value === "object") {
+    if (typeof value.content === "string") return value.content;
+    if (typeof value.text === "string") return value.text;
+    if (typeof value.message === "string") return value.message;
+    if (value.message && typeof value.message === "object") {
+      return normalizeAiResponseText(value.message);
+    }
+    if (Array.isArray(value.content)) {
+      return normalizeAiResponseText(value.content);
+    }
+  }
+
+  return "";
+}
+
+function extractJsonText(content = "") {
+  const text = String(content || "").trim();
+  if (!text) return "";
+
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced) return fenced[1].trim();
+
+  const firstBrace = text.indexOf("{");
+  const lastBrace = text.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    return text.slice(firstBrace, lastBrace + 1);
+  }
+
+  return text;
+}
 
 /**
  * Compare a job and an application (resume + candidate details) using the AI service.
@@ -82,35 +122,19 @@ Instructions:
       model,
       messages: [{ role: "system", content: systemPrompt }, ...userPrompt],
       temperature: 0.0,
-      max_tokens: 800,
+      ...JSON_COMPLETION_PARAMS,
     });
 
-    const content =
-      resp?.choices?.[0]?.message?.content ||
-      resp?.choices?.[0]?.message ||
-      resp?.choices?.[0]?.text ||
-      "";
+    const content = normalizeAiResponseText(
+      resp?.choices?.[0]?.message ?? resp?.choices?.[0] ?? "",
+    );
 
-    // Try to extract JSON substring if the model wrapped with text
-    let jsonText = content;
-    const jsonFenceMatch = content.match(/```(?:json)?\n([\s\S]*?)```/);
-    if (jsonFenceMatch) {
-      jsonText = jsonFenceMatch[1];
-    } else {
-      // Try to find first "{" ... "}" block
-      const firstBrace = content.indexOf("{");
-      const lastBrace = content.lastIndexOf("}");
-      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-        jsonText = content.slice(firstBrace, lastBrace + 1);
-      }
-    }
-
+    const jsonText = extractJsonText(content);
     let parsed = {};
     try {
-      parsed = JSON.parse(jsonText);
-    } catch (err) {
-      // If parsing failed, keep parsed as empty object to allow graceful handling below
-      parsed = parsed || {};
+      parsed = JSON.parse(jsonText || "{}");
+    } catch {
+      parsed = {};
     }
 
     // Normalize outputs
