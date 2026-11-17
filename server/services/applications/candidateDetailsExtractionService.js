@@ -1,5 +1,53 @@
 import { extractSkills } from "../job/skillExtractionService.js";
 
+function normalizeAiResponseText(value) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeAiResponseText(item))
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  if (value && typeof value === "object") {
+    if (typeof value.content === "string") return value.content;
+    if (typeof value.text === "string") return value.text;
+    if (typeof value.message === "string") return value.message;
+    if (value.message && typeof value.message === "object") {
+      return normalizeAiResponseText(value.message);
+    }
+    if (Array.isArray(value.content)) {
+      return normalizeAiResponseText(value.content);
+    }
+  }
+
+  return "";
+}
+
+function parseJsonFromAiResponse(content = "") {
+  const text = String(content || "").trim();
+  if (!text) return null;
+
+  const candidates = [];
+  if (text.startsWith("{") && text.endsWith("}")) {
+    candidates.push(text);
+  }
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) candidates.push(jsonMatch[0]);
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed && typeof parsed === "object") return parsed;
+    } catch {
+      // Try the next candidate if the current one is malformed.
+    }
+  }
+
+  return null;
+}
+
 /**
  * Extracts candidate details from a resume text.
  * Returns an object matching the candidate subdocument in application.model:
@@ -21,7 +69,7 @@ export async function extractCandidateDetails(resumeText = "", opts = {}) {
   // Attempt AI extraction when available (OpenRouter compatible aiService.js)
   if (process.env.OPENROUTER_API_KEY) {
     try {
-      const { ai } = await import("../aiService.js");
+      const { ai, JSON_COMPLETION_PARAMS } = await import("../aiService.js");
       const prompt = `Extract candidate details from the resume below. Collect candidate details and skills - the skills are from what the candidate has mentioned in their resume and what they have showcased in their projects and experience. Return valid JSON only with keys:
 - name (string)
 - email (string)
@@ -41,16 +89,18 @@ Return JSON only.`;
       const resp = await ai.chat.completions.create({
         model,
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 800,
         temperature: 0.0,
+        ...JSON_COMPLETION_PARAMS,
       });
 
-      const content =
-        resp?.choices?.[0]?.message?.content || resp?.choices?.[0]?.text || "";
+      const content = normalizeAiResponseText(
+        resp?.choices?.[0]?.message ?? resp?.choices?.[0] ?? "",
+      );
 
-      // attempt to extract JSON from content
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
+      const parsed = parseJsonFromAiResponse(content);
+      if (!parsed) {
+        throw new Error("No valid JSON object found in AI response");
+      }
 
       const skills =
         Array.isArray(parsed.skills) && parsed.skills.length
@@ -70,16 +120,17 @@ Return JSON only.`;
         "AI candidate extraction failed, falling back to heuristic:",
         err?.message || err,
       );
-      // fall through to heuristic
     }
   }
 
+  const heuristicSkills = await extractSkills(text, { min: 4, max: 12 });
+
   return {
-    name: name || "",
-    email: email || "",
-    phone: phone || "",
-    location: location || "",
-    background,
-    extractedSkills,
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    background: "",
+    extractedSkills: heuristicSkills,
   };
 }

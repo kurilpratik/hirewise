@@ -47,4 +47,22 @@ async function chatCompletion({
 }
 */
 
+/**
+ * Shared request parameters for completions that must return JSON.
+ *
+ * Every free model on OpenRouter is now a reasoning model, and reasoning tokens
+ * are billed against `max_tokens`. With a small cap the model spends its entire
+ * budget thinking, hits `finish_reason: "length"` and returns `content: null`,
+ * which callers then parse as an empty result.
+ *
+ * - max_tokens      headroom for reasoning tokens plus the actual answer
+ * - response_format constrains output to a JSON object (supported by most free models)
+ * - reasoning       caps thinking so it cannot consume the whole budget
+ */
+export const JSON_COMPLETION_PARAMS = {
+  max_tokens: Number(process.env.OPENROUTER_MAX_TOKENS) || 3000,
+  response_format: { type: "json_object" },
+  reasoning: { effort: process.env.OPENROUTER_REASONING_EFFORT || "low" },
+};
+
 export { openai as ai };
