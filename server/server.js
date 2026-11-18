@@ -27,7 +27,10 @@ app.use("/api/apps", appsRoutes);
 app.use("/api/jobs", jobRoutes);
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "OK" });
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // The wildcard * needs to appear after all the routes
