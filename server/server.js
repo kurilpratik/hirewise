@@ -5,6 +5,7 @@ import connectDB from "./config/database.js";
 
 import appsRoutes from "./routes/application.routes.js";
 import jobRoutes from "./routes/job.routes.js";
+import { UPLOAD_DIR } from "./middleware/upload.midd.js";
 
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
@@ -18,6 +19,9 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next(); // Ensure next() is called
 });
+
+// Resumes kept on local disk (used when S3 is not configured)
+app.use("/uploads/resumes", express.static(UPLOAD_DIR));
 
 app.use("/api/apps", appsRoutes);
 app.use("/api/jobs", jobRoutes);

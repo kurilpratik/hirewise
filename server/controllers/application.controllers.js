@@ -1,16 +1,10 @@
-import { Queue } from "bullmq";
 import Application from "../models/application.model.js";
 import Job from "../models/job.model.js";
 import { processAndCreateApplication } from "../services/applications/processAndCreateApplicationService.js";
 import { extractCandidateDetails } from "../services/applications/candidateDetailsExtractionService.js";
 import { compareResumeAndJob } from "../services/applications/compareResumeAndJobService.js";
-
-const applicationQueue = new Queue("application", {
-  connection: {
-    host: "localhost",
-    port: 6379, //valkey port
-  },
-});
+import { enqueueApplication } from "../config/queue.js";
+import { storeResume, removeLocalFile } from "../middleware/upload.midd.js";
 
 export const createApplication = async (req, res) => {
   try {
@@ -25,11 +19,28 @@ export const createApplication = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    // Persist the resume first (S3 when configured, local disk otherwise). The
+    // local copy is kept until the PDF has been read below.
+    let storedResume;
+    try {
+      storedResume = await storeResume(req.file);
+    } catch (err) {
+      console.error("Failed to store resume:", err?.message || err);
+      await removeLocalFile(req.file);
+      return res.status(500).json({ error: "Failed to store resume" });
+    }
+
     // Process file (e.g. extract text/pages) - returns { docsText, resumeText, ... }
-    const applicationDoc = await processAndCreateApplication({
-      file: req.file,
-      jobId,
-    });
+    let applicationDoc;
+    try {
+      applicationDoc = await processAndCreateApplication({
+        file: req.file,
+        jobId,
+      });
+    } finally {
+      // Once the file lives in S3 the local copy is no longer needed.
+      if (storedResume.storage === "s3") await removeLocalFile(req.file);
+    }
 
     // Prefer resumeText, fallback to docsText
     const resumeText = String(
@@ -61,10 +72,8 @@ export const createApplication = async (req, res) => {
         ? candidateDetails.email.trim().toLowerCase()
         : `unknown+${Date.now()}@example.com`;
 
-    const resumePath =
-      (req.file &&
-        (req.file?.s3?.url || req.file?.path || req.file?.filename)) ||
-      "";
+    // Public S3 URL, or a /uploads/resumes/... path served by this API.
+    const resumePath = storedResume.url;
 
     // Build base application data (we will add AI comparison results before creating)
     const appData = {
@@ -167,8 +176,10 @@ export const createApplication = async (req, res) => {
       console.warn("Failed to add application to job:", err?.message || err);
     }
 
-    // Enqueue for further processing (e.g. vector store / heavy processing)
-    await applicationQueue.add("file-ready", {
+    // Enqueue for further processing (e.g. vector store / heavy processing).
+    // Fire-and-forget: it never throws, and an unavailable Redis must not fail
+    // or delay a request whose application is already saved.
+    void enqueueApplication({
       applicationId: createdApplication._id,
       jobId,
       file: req.file,

@@ -8,6 +8,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { resolveResumeUrl } from "@/lib/resumeUrl";
 
 import {
   FileText,
@@ -17,6 +18,8 @@ import {
   Briefcase,
   ExternalLink,
 } from "lucide-react";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const ApplicationInfo = ({ application = {} }) => {
   const candidate = application?.candidate || {};
@@ -29,7 +32,7 @@ const ApplicationInfo = ({ application = {} }) => {
     application.city ||
     "Unknown";
   const background = candidate.background || "Not specified";
-  const resumeUrl = candidate.resumePath || null;
+  const resumeUrl = resolveResumeUrl(candidate.resumePath, API_BASE);
   const name = candidate.name || application.name || "Candidate";
 
   return (

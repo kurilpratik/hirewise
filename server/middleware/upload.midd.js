@@ -1,3 +1,4 @@
+import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import multer from "multer";
@@ -5,7 +6,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_NODE_MESSAGE = "1";
 
-const UPLOAD_DIR = path.resolve(process.cwd(), "server", "uploads", "resumes");
+export const UPLOAD_DIR = path.resolve(process.cwd(), "server", "uploads", "resumes");
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
@@ -63,93 +64,117 @@ export function multerErrorHandler(err, req, res, next) {
   return next(err);
 }
 
-// SAVE TO S3
+// RESUME STORAGE
+//
+// Multer always writes the upload to UPLOAD_DIR first, because the PDF is read
+// from disk afterwards. storeResume() then decides where the file is served from:
+//   - S3 when AWS_S3_BUCKET_NAME and credentials are configured
+//   - otherwise the local disk, via the /uploads/resumes static route
+// Note: on hosts with an ephemeral disk (e.g. Render) the local fallback is lost
+// on every deploy, so production should use S3.
 
-// use region variable and conditionally supply credentials
-const region = process.env.AWS_REGION || "eu-north-1";
-const hasAccessKeys =
-  !!process.env.AWS_ACCESS_KEY_ID && !!process.env.AWS_SECRET_ACCESS_KEY;
+const DEFAULT_REGION = "eu-north-1";
 
-// Configure S3 client
-const s3Client = new S3Client(
-  hasAccessKeys
-    ? {
-        region,
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        },
-      }
-    : { region },
-);
+function hasS3Credentials() {
+  return (
+    (!!process.env.AWS_ACCESS_KEY_ID && !!process.env.AWS_SECRET_ACCESS_KEY) ||
+    !!process.env.AWS_PROFILE ||
+    !!process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
+  );
+}
 
-export const saveToS3 = async (req, res, next) => {
-  console.log("AWS Config:", {
-    region: process.env.AWS_REGION,
-    hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
-    hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
-    bucket: process.env.AWS_S3_BUCKET_NAME,
-  });
-  if (!req.file) return next();
+export function isS3Configured() {
+  return !!process.env.AWS_S3_BUCKET_NAME && hasS3Credentials();
+}
+
+let s3Client;
+function getS3Client() {
+  if (s3Client) return s3Client;
+  const region = process.env.AWS_REGION || DEFAULT_REGION;
+  const hasAccessKeys =
+    !!process.env.AWS_ACCESS_KEY_ID && !!process.env.AWS_SECRET_ACCESS_KEY;
+  s3Client = new S3Client(
+    hasAccessKeys
+      ? {
+          region,
+          credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+          },
+        }
+      : { region },
+  );
+  return s3Client;
+}
+
+let warnedLocalStorage = false;
+
+function localResult(file) {
+  return {
+    storage: "local",
+    url: `/uploads/resumes/${encodeURIComponent(file.filename)}`,
+  };
+}
+
+/**
+ * Persist an uploaded resume and return where it can be fetched from.
+ * Does NOT delete the local file; call removeLocalFile() once it has been read.
+ *
+ * @param {Express.Multer.File} file
+ * @returns {Promise<{ storage: "s3" | "local", url: string, bucket?: string, key?: string }>}
+ */
+export async function storeResume(file) {
+  if (!isS3Configured()) {
+    if (!warnedLocalStorage) {
+      warnedLocalStorage = true;
+      console.warn(
+        "[storage] S3 is not configured; resumes are kept on local disk" +
+          (process.env.NODE_ENV === "production"
+            ? " and will be lost on redeploy. Set AWS_S3_BUCKET_NAME and AWS credentials."
+            : "."),
+      );
+    }
+    return localResult(file);
+  }
 
   const bucket = process.env.AWS_S3_BUCKET_NAME;
-  if (!bucket) {
-    await fs.promises
-      .unlink(path.join(UPLOAD_DIR, req.file.filename))
-      .catch(() => {});
-    return res.status(500).json({ error: "S3 bucket not configure" });
-  }
-
-  // fail fast if explicit access keys are expected but not provided
-  if (
-    !hasAccessKeys &&
-    !process.env.AWS_PROFILE &&
-    !process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-  ) {
-    await fs.promises
-      .unlink(path.join(UPLOAD_DIR, req.file.filename))
-      .catch(() => {});
-    return res.status(500).json({
-      error:
-        "AWS credentials not configured. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, or configure the SDK (profile/EC2/ECS role)",
-    });
-  }
-
-  const key = `resumes/${req.file.filename}`;
-  const filePath = path.join(UPLOAD_DIR, req.file.filename);
+  const region = process.env.AWS_REGION || DEFAULT_REGION;
+  const key = `resumes/${file.filename}`;
 
   try {
-    const fileStream = fs.createReadStream(filePath);
-    const uploadParams = {
-      Bucket: bucket,
-      Key: key,
-      Body: fileStream,
-      ContentType: req.file.mimetype,
-    };
-
-    await s3Client.send(new PutObjectCommand(uploadParams));
-
-    const s3Url = `https://${bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(
-      key,
-    )}`;
-    console.log("Uploaded to S3:", s3Url);
-
-    // remove local file after successful upload
-    await fs.promises.unlink(filePath).catch(() => {
-      console.log("Local file removed");
-    });
-
-    // attach S3 info to req.file for downstream handlers
-    req.file.s3 = { bucket, key, s3Url };
-    return next();
+    // Uploads are capped at 5 MB, so buffering is fine and avoids the unknown
+    // content-length issues of streaming bodies.
+    const body = await fs.promises.readFile(file.path);
+    await getS3Client().send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: body,
+        ContentType: file.mimetype,
+      }),
+    );
   } catch (err) {
-    // try to remove local file on error
-    console.error("S3 upload error:", err);
-    await fs.promises
-      .unlink(path.join(UPLOAD_DIR, req.file.filename))
-      .catch(() => {});
-    return res.status(500).json({
-      error: "Failed to upload file to S3",
-    });
+    // In production a failed upload must surface: the local disk is ephemeral,
+    // so falling back would silently produce links that die on the next deploy.
+    if (process.env.NODE_ENV === "production") throw err;
+
+    // In development a stale or missing AWS key shouldn't block the whole
+    // upload flow, so keep the file locally and say why.
+    console.warn(
+      `[storage] S3 upload failed (${err?.name || "Error"}: ${err?.message || err}). ` +
+        "Falling back to local disk because NODE_ENV is not production. " +
+        "Fix the AWS_* values in .env before deploying.",
+    );
+    return localResult(file);
   }
-};
+
+  const encodedKey = key.split("/").map(encodeURIComponent).join("/");
+  const url = `https://${bucket}.s3.${region}.amazonaws.com/${encodedKey}`;
+  return { storage: "s3", url, bucket, key };
+}
+
+/** Best-effort removal of the multer temp file. */
+export async function removeLocalFile(file) {
+  if (!file?.path) return;
+  await fs.promises.unlink(file.path).catch(() => {});
+}

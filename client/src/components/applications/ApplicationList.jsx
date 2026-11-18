@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ItemGroup, Item, ItemContent, ItemTitle } from "../ui/item";
 
 import { Link, useParams } from "react-router-dom";
+import { resolveResumeUrl, resumeFileName } from "@/lib/resumeUrl";
 
 const ApplicationList = ({ jobId: propJobId }) => {
   const { jobId: routeJobId } = useParams();
@@ -115,14 +116,10 @@ const ApplicationList = ({ jobId: propJobId }) => {
           const decoration = getRankDecoration(app.rank);
           const isTopThree = (app.rank || 999) <= 3;
 
-          const resumeHref = candidate.resumePath
-            ? String(candidate.resumePath).startsWith("http")
-              ? String(candidate.resumePath)
-              : `${API_BASE.replace(/\/+$/, "")}/${String(candidate.resumePath).replace(/^\/+/, "")}`
-            : null;
+          const resumeHref = resolveResumeUrl(candidate.resumePath, API_BASE);
 
           const resumeLabel = resumeHref
-            ? String(candidate.resumePath).split("/").pop()
+            ? resumeFileName(candidate.resumePath)
             : (candidate.resumeText &&
                 `${String(candidate.resumeText).slice(0, 40)}...`) ||
               "—";
